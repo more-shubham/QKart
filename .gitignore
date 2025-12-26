@@ -38,3 +38,6 @@ coverage/
 # Misc
 *.bak
 *.tmp
+
+# Claude settings
+.claude/
