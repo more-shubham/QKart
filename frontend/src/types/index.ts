@@ -61,32 +61,6 @@ export interface Order {
   createdAt: string;
 }
 
-// QTify types
-export interface Song {
-  id: number;
-  title: string;
-  artist: string;
-  durationSeconds: number;
-  audioUrl: string;
-  trackNumber: number;
-  plays: number;
-  albumId: number;
-  albumTitle: string;
-}
-
-export interface Album {
-  id: number;
-  title: string;
-  artist: string;
-  imageUrl: string;
-  releaseYear: number;
-  genre: string;
-  likes: number;
-  rating: number;
-  isFeatured: boolean;
-  songs?: Song[];
-}
-
 // API Request types
 export interface AddToCartRequest {
   productId: number;

@@ -11,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "QKart - Online Shopping & Music Streaming",
-  description: "Shop amazing products and stream your favorite music on QKart",
+  title: "QKart - Online Shopping",
+  description: "Shop amazing products at great prices on QKart",
 };
 
 export default function RootLayout({

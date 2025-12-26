@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
-import { ShoppingCartIcon, MagnifyingGlassIcon, MusicalNoteIcon } from '@heroicons/react/24/outline';
+import { ShoppingCartIcon } from '@heroicons/react/24/outline';
 
 export function Header() {
   const { cart } = useCart();
 
   return (
-    <header className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg sticky top-0 z-50">
+    <header className="bg-blue-600 text-white shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold tracking-tight hover:text-blue-200 transition-colors">
@@ -16,12 +16,11 @@ export function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
+            <Link href="/" className="hover:text-blue-200 transition-colors font-medium">
+              Home
+            </Link>
             <Link href="/products" className="hover:text-blue-200 transition-colors font-medium">
               Products
-            </Link>
-            <Link href="/qtify" className="flex items-center gap-2 hover:text-blue-200 transition-colors font-medium">
-              <MusicalNoteIcon className="w-5 h-5" />
-              QTify
             </Link>
           </nav>
 

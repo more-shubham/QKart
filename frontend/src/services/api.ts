@@ -3,8 +3,6 @@ import {
   Cart,
   Order,
   Address,
-  Album,
-  Song,
   AddToCartRequest,
   CheckoutRequest,
 } from '@/types';
@@ -105,62 +103,13 @@ class ApiService {
       body: JSON.stringify(address),
     });
   }
-
-  // QTify - Albums
-  async getAlbums(): Promise<Album[]> {
-    return this.fetch<Album[]>('/albums');
-  }
-
-  async getAlbumById(id: number): Promise<Album> {
-    return this.fetch<Album>(`/albums/${id}`);
-  }
-
-  async getFeaturedAlbums(): Promise<Album[]> {
-    return this.fetch<Album[]>('/albums/featured');
-  }
-
-  async getTopAlbums(): Promise<Album[]> {
-    return this.fetch<Album[]>('/albums/top');
-  }
-
-  async getAlbumsByGenre(genre: string): Promise<Album[]> {
-    return this.fetch<Album[]>(`/albums/genre/${genre}`);
-  }
-
-  async searchAlbums(query: string): Promise<Album[]> {
-    return this.fetch<Album[]>(`/albums/search?q=${encodeURIComponent(query)}`);
-  }
-
-  async getGenres(): Promise<string[]> {
-    return this.fetch<string[]>('/albums/genres');
-  }
-
-  // QTify - Songs
-  async getSongsByAlbum(albumId: number): Promise<Song[]> {
-    return this.fetch<Song[]>(`/albums/${albumId}/songs`);
-  }
-
-  async getTopSongs(): Promise<Song[]> {
-    return this.fetch<Song[]>('/albums/songs/top');
-  }
-
-  async searchSongs(query: string): Promise<Song[]> {
-    return this.fetch<Song[]>(`/albums/songs/search?q=${encodeURIComponent(query)}`);
-  }
 }
 
 export const api = new ApiService();
 
 // Parallel API calls using Promise combinators
-export async function fetchHomePageData() {
-  const [products, categories, featuredAlbums, topAlbums] = await Promise.all([
-    api.getProducts(),
-    api.getCategories(),
-    api.getFeaturedAlbums(),
-    api.getTopAlbums(),
-  ]);
-
-  return { products, categories, featuredAlbums, topAlbums };
+export async function fetchProducts() {
+  return api.getProducts();
 }
 
 export async function fetchProductsAndCategories() {
@@ -179,15 +128,4 @@ export async function fetchCheckoutData(userId: number) {
   ]);
 
   return { cart, addresses };
-}
-
-export async function fetchQTifyData() {
-  const [featuredAlbums, topAlbums, topSongs, genres] = await Promise.all([
-    api.getFeaturedAlbums(),
-    api.getTopAlbums(),
-    api.getTopSongs(),
-    api.getGenres(),
-  ]);
-
-  return { featuredAlbums, topAlbums, topSongs, genres };
 }

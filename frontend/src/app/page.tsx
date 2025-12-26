@@ -1,56 +1,45 @@
 import Link from 'next/link';
-import { fetchHomePageData } from '@/services/api';
+import { fetchProducts } from '@/services/api';
 import { ProductGrid } from '@/components/products/ProductGrid';
-import { AlbumCarousel } from '@/components/qtify/AlbumCarousel';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  let data;
+  let products = [];
   try {
-    data = await fetchHomePageData();
+    products = await fetchProducts();
   } catch (error) {
     // Fallback for when backend is not running
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-4xl font-bold mb-4">Welcome to QKart</h1>
         <p className="text-gray-600 mb-8">
-          Start the backend server to see products and music.
+          Start the backend server to see products.
         </p>
         <code className="bg-gray-100 px-4 py-2 rounded">
-          cd backend && ./mvnw spring-boot:run
+          cd backend && mvn spring-boot:run
         </code>
       </div>
     );
   }
 
-  const { products, featuredAlbums, topAlbums } = data;
-
   return (
     <div>
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20">
+      <section className="bg-blue-600 text-white py-20">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-5xl font-bold mb-4">
             Welcome to QKart
           </h1>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Discover amazing products and stream your favorite music all in one place
+            Discover amazing products at great prices
           </p>
-          <div className="flex gap-4 justify-center">
-            <Link
-              href="/products"
-              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
-            >
-              Shop Now
-            </Link>
-            <Link
-              href="/qtify"
-              className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors"
-            >
-              Browse Music
-            </Link>
-          </div>
+          <Link
+            href="/products"
+            className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors inline-block"
+          >
+            Shop Now
+          </Link>
         </div>
       </section>
 
@@ -68,25 +57,8 @@ export default async function HomePage() {
         <ProductGrid products={products.slice(0, 4)} />
       </section>
 
-      {/* QTify Section */}
-      <section className="bg-gray-900 py-16">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-white">QTify Music</h2>
-            <Link
-              href="/qtify"
-              className="text-green-500 font-medium hover:underline"
-            >
-              Explore Music →
-            </Link>
-          </div>
-          <AlbumCarousel title="Featured Albums" albums={featuredAlbums} showCollapse={false} />
-          <AlbumCarousel title="Top Charts" albums={topAlbums} showCollapse={false} />
-        </div>
-      </section>
-
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-16">
+      <section className="container mx-auto px-4 py-16 bg-gray-50">
         <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
           Why Choose QKart?
         </h2>
@@ -105,12 +77,12 @@ export default async function HomePage() {
           <div className="text-center p-6">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Music Streaming</h3>
+            <h3 className="text-xl font-semibold mb-2">Great Prices</h3>
             <p className="text-gray-600">
-              Stream millions of songs with QTify integration
+              Competitive pricing on all products
             </p>
           </div>
           <div className="text-center p-6">
