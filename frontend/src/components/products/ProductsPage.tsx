@@ -19,6 +19,14 @@ export function ProductsPage({ products, categories }: ProductsPageProps) {
     setSearchQuery(query);
   }, []);
 
+  // Calculate category counts
+  const categoryCounts = useMemo(() => {
+    return products.reduce((acc, product) => {
+      acc[product.category] = (acc[product.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+  }, [products]);
+
   const filteredProducts = useMemo(() => {
     let result = products;
 
@@ -58,6 +66,8 @@ export function ProductsPage({ products, categories }: ProductsPageProps) {
         categories={categories}
         selectedCategory={selectedCategory}
         onCategoryChange={setSelectedCategory}
+        categoryCounts={categoryCounts}
+        totalCount={products.length}
       />
 
       <ProductGrid products={filteredProducts} />

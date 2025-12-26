@@ -4,12 +4,16 @@ interface CategoryFilterProps {
   categories: string[];
   selectedCategory: string | null;
   onCategoryChange: (category: string | null) => void;
+  categoryCounts?: Record<string, number>;
+  totalCount?: number;
 }
 
 export function CategoryFilter({
   categories,
   selectedCategory,
   onCategoryChange,
+  categoryCounts = {},
+  totalCount = 0,
 }: CategoryFilterProps) {
   return (
     <div className="flex flex-wrap gap-2">
@@ -21,7 +25,7 @@ export function CategoryFilter({
             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
         }`}
       >
-        All
+        All ({totalCount})
       </button>
       {categories.map((category) => (
         <button
@@ -33,7 +37,7 @@ export function CategoryFilter({
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          {category}
+          {category} ({categoryCounts[category] || 0})
         </button>
       ))}
     </div>
