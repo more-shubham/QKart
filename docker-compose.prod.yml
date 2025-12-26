@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: qkart-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-qkart}
+      POSTGRES_USER: ${POSTGRES_USER:-qkart}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Database password required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-qkart} -d ${POSTGRES_DB:-qkart}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: ghcr.io/${GITHUB_REPOSITORY:-qkart}/backend:${TAG:-main}
+    container_name: qkart-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-qkart}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-qkart}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Database password required}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      JWT_SECRET: ${JWT_SECRET:?JWT secret required}
+      STRIPE_API_KEY: ${STRIPE_API_KEY:?Stripe API key required}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:?Stripe webhook secret required}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY:-qkart}/frontend:${TAG:-main}
+    container_name: qkart-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: ${API_URL:-http://localhost:8080/api}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

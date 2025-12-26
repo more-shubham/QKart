@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -21,13 +20,6 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
-    }
-
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-        String name = body.get("name");
-        return ResponseEntity.ok(userService.createUser(email, name));
     }
 
     @GetMapping("/{userId}/addresses")

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +22,8 @@ public class OrderService {
     private final AddressRepository addressRepository;
     private final UserRepository userRepository;
     private final CartService cartService;
+    private final CouponService couponService;
+    private final LoyaltyService loyaltyService;
 
     @Transactional
     public OrderDTO checkout(CheckoutRequest request) {
@@ -37,7 +40,7 @@ public class OrderService {
         Address shippingAddress = addressRepository.findById(request.getShippingAddressId())
                 .orElseThrow(() -> new RuntimeException("Address not found"));
 
-        BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal subtotal = BigDecimal.ZERO;
         List<OrderItem> orderItems = new ArrayList<>();
 
         Order order = Order.builder()
@@ -50,7 +53,7 @@ public class OrderService {
         for (CartItem cartItem : cart.getItems()) {
             Product product = cartItem.getProduct();
             BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
-            totalAmount = totalAmount.add(itemTotal);
+            subtotal = subtotal.add(itemTotal);
 
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
@@ -62,9 +65,42 @@ public class OrderService {
         }
 
         order.setItems(orderItems);
+        order.setSubtotal(subtotal);
+        order.setPaymentMethod(request.getPaymentMethod());
+        order.setConfirmedAt(LocalDateTime.now());
+        // Set estimated delivery to 5-7 days from now
+        order.setEstimatedDeliveryDate(LocalDateTime.now().plusDays(5));
+
+        // Apply coupon if provided
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        if (request.getCouponCode() != null && !request.getCouponCode().isBlank()) {
+            ApplyCouponRequest couponRequest = new ApplyCouponRequest();
+            couponRequest.setCode(request.getCouponCode());
+            couponRequest.setUserId(request.getUserId());
+            couponRequest.setOrderAmount(subtotal);
+
+            CouponValidationResponse couponValidation = couponService.validateCoupon(couponRequest);
+            if (couponValidation.isValid()) {
+                discountAmount = couponValidation.getDiscountAmount();
+                order.setCouponCode(request.getCouponCode().toUpperCase());
+                order.setDiscountAmount(discountAmount);
+            } else {
+                throw new RuntimeException(couponValidation.getMessage());
+            }
+        }
+
+        BigDecimal totalAmount = subtotal.subtract(discountAmount);
         order.setTotalAmount(totalAmount);
 
         Order savedOrder = orderRepository.save(order);
+
+        // Record coupon usage after order is saved
+        if (order.getCouponCode() != null) {
+            couponService.recordCouponUsage(order.getCouponCode(), request.getUserId(), savedOrder.getId());
+        }
+
+        // Award loyalty points based on order total
+        loyaltyService.earnPoints(request.getUserId(), totalAmount.doubleValue(), savedOrder.getId());
 
         cartService.clearCart(request.getUserId());
 
@@ -81,6 +117,36 @@ public class OrderService {
         return orderRepository.findById(orderId)
                 .map(this::toDTO)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
+    }
+
+    @Transactional
+    public OrderDTO updateOrderStatus(Long orderId, String status, String trackingNumber, String carrier) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        Order.OrderStatus newStatus = Order.OrderStatus.valueOf(status);
+        order.setStatus(newStatus);
+
+        // Set tracking info if provided
+        if (trackingNumber != null) {
+            order.setTrackingNumber(trackingNumber);
+        }
+        if (carrier != null) {
+            order.setShippingCarrier(carrier);
+        }
+
+        // Set timestamp based on status
+        LocalDateTime now = LocalDateTime.now();
+        switch (newStatus) {
+            case CONFIRMED -> order.setConfirmedAt(now);
+            case SHIPPED -> order.setShippedAt(now);
+            case DELIVERED -> order.setDeliveredAt(now);
+            case CANCELLED -> order.setCancelledAt(now);
+            default -> {}
+        }
+
+        Order savedOrder = orderRepository.save(order);
+        return toDTO(savedOrder);
     }
 
     private OrderDTO toDTO(Order order) {
@@ -107,9 +173,20 @@ public class OrderService {
                 .userId(order.getUser().getId())
                 .items(items)
                 .shippingAddress(addressDTO)
+                .subtotal(order.getSubtotal())
+                .couponCode(order.getCouponCode())
+                .discountAmount(order.getDiscountAmount())
                 .totalAmount(order.getTotalAmount())
+                .paymentMethod(order.getPaymentMethod())
                 .status(order.getStatus().name())
+                .trackingNumber(order.getTrackingNumber())
+                .shippingCarrier(order.getShippingCarrier())
+                .estimatedDeliveryDate(order.getEstimatedDeliveryDate())
                 .createdAt(order.getCreatedAt())
+                .confirmedAt(order.getConfirmedAt())
+                .shippedAt(order.getShippedAt())
+                .deliveredAt(order.getDeliveredAt())
+                .cancelledAt(order.getCancelledAt())
                 .build();
     }
 

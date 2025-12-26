@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { fetchProducts } from '@/services/api';
 import { ProductGrid } from '@/components/products/ProductGrid';
+import { RecommendationSection } from '@/components/recommendations';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,6 +56,11 @@ export default async function HomePage() {
           </Link>
         </div>
         <ProductGrid products={products.slice(0, 4)} />
+      </section>
+
+      {/* Personalized Recommendations */}
+      <section className="container mx-auto px-4 py-8">
+        <RecommendationSection />
       </section>
 
       {/* Features Section */}

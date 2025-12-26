@@ -16,4 +16,6 @@ public class CheckoutRequest {
     private Long shippingAddressId;
 
     private String paymentMethod;
+
+    private String couponCode;
 }

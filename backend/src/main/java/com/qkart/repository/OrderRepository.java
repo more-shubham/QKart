@@ -15,4 +15,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
 
     List<Order> findByStatus(Order.OrderStatus status);
+
+    @Query("SELECT CASE WHEN COUNT(oi) > 0 THEN true ELSE false END FROM Order o JOIN o.items oi WHERE o.user.id = :userId AND oi.productId = :productId")
+    boolean existsByUserIdAndProductId(@Param("userId") Long userId, @Param("productId") Long productId);
 }

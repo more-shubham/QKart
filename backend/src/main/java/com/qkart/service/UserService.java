@@ -29,17 +29,6 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public User createUser(String email, String name) {
-        if (userRepository.existsByEmail(email)) {
-            throw new RuntimeException("User with this email already exists");
-        }
-        User user = User.builder()
-                .email(email)
-                .name(name)
-                .build();
-        return userRepository.save(user);
-    }
-
     public List<AddressDTO> getUserAddresses(Long userId) {
         return addressRepository.findByUserId(userId).stream()
                 .map(this::toAddressDTO)

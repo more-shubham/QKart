@@ -1,23 +1,26 @@
 'use client';
 
 import Image from 'next/image';
-import { Cart } from '@/types';
+import { Cart, CouponValidationResponse } from '@/types';
 
 interface OrderReviewProps {
   cart: Cart;
+  appliedCoupon?: CouponValidationResponse | null;
+  finalAmount?: number;
 }
 
-export function OrderReview({ cart }: OrderReviewProps) {
+export function OrderReview({ cart, appliedCoupon, finalAmount }: OrderReviewProps) {
   const subtotal = cart.totalAmount;
-  const shipping = 9.99;
-  const tax = subtotal * 0.08;
-  const total = subtotal + shipping + tax;
+  const discount = appliedCoupon?.discountAmount || 0;
+  const afterDiscount = finalAmount ?? subtotal;
+  const tax = afterDiscount * 0.08;
+  const total = afterDiscount + tax;
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">
       <h2 className="text-lg font-semibold mb-4">Order Review</h2>
 
-      <div className="space-y-4">
+      <div className="space-y-4 max-h-64 overflow-y-auto">
         {cart.items.map((item) => (
           <div key={item.id} className="flex gap-3">
             <div className="relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
@@ -42,9 +45,22 @@ export function OrderReview({ cart }: OrderReviewProps) {
           <span className="text-gray-600">Subtotal</span>
           <span>${subtotal.toFixed(2)}</span>
         </div>
+
+        {appliedCoupon && discount > 0 && (
+          <div className="flex justify-between text-sm text-green-600">
+            <span>
+              Discount ({appliedCoupon.code})
+              {appliedCoupon.discountType === 'PERCENTAGE' && (
+                <span className="text-xs ml-1">({appliedCoupon.discountValue}% off)</span>
+              )}
+            </span>
+            <span>-${discount.toFixed(2)}</span>
+          </div>
+        )}
+
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">Shipping</span>
-          <span>${shipping.toFixed(2)}</span>
+          <span>Free</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">Tax (8%)</span>

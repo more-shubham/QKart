@@ -36,14 +36,39 @@ public class Order {
     private Address shippingAddress;
 
     @Column(nullable = false)
+    private BigDecimal subtotal;
+
+    private String couponCode;
+
+    private BigDecimal discountAmount;
+
+    @Column(nullable = false)
     private BigDecimal totalAmount;
+
+    private String paymentMethod;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;
 
+    // Tracking information
+    private String trackingNumber;
+
+    private String shippingCarrier;
+
+    private LocalDateTime estimatedDeliveryDate;
+
+    // Status timestamps
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    private LocalDateTime confirmedAt;
+
+    private LocalDateTime shippedAt;
+
+    private LocalDateTime deliveredAt;
+
+    private LocalDateTime cancelledAt;
 
     private LocalDateTime updatedAt;
 
@@ -61,6 +86,6 @@ public class Order {
     }
 
     public enum OrderStatus {
-        PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+        PENDING, CONFIRMED, PROCESSING, SHIPPED, OUT_FOR_DELIVERY, DELIVERED, CANCELLED
     }
 }

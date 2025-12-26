@@ -1,12 +1,16 @@
 package com.qkart.controller;
 
 import com.qkart.dto.ProductDTO;
+import com.qkart.dto.ProductSearchCriteria;
+import com.qkart.dto.ProductSearchResponse;
 import com.qkart.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/products")
@@ -38,6 +42,24 @@ public class ProductController {
     @GetMapping("/categories")
     public ResponseEntity<List<String>> getAllCategories() {
         return ResponseEntity.ok(productService.getAllCategories());
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<ProductSearchResponse> searchWithFilters(@RequestBody ProductSearchCriteria criteria) {
+        return ResponseEntity.ok(productService.searchWithFilters(criteria));
+    }
+
+    @GetMapping("/suggestions")
+    public ResponseEntity<List<String>> getSuggestions(@RequestParam String q) {
+        return ResponseEntity.ok(productService.getSuggestions(q));
+    }
+
+    @GetMapping("/price-range")
+    public ResponseEntity<Map<String, BigDecimal>> getPriceRange() {
+        return ResponseEntity.ok(Map.of(
+            "min", productService.getMinPrice(),
+            "max", productService.getMaxPrice()
+        ));
     }
 
     @PostMapping

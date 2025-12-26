@@ -4,6 +4,7 @@ import com.qkart.model.*;
 import com.qkart.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ public class DataSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
     private final CartRepository cartRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) {
@@ -59,9 +61,14 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedUsers() {
-        User user = new User();
-        user.setEmail("demo@qkart.com");
-        user.setName("Demo User");
+        // Create demo customer
+        User user = User.builder()
+                .email("demo@qkart.com")
+                .password(passwordEncoder.encode("Demo@123"))
+                .name("Demo User")
+                .role(User.Role.CUSTOMER)
+                .emailVerified(true)
+                .build();
         user = userRepository.save(user);
 
         Address address = new Address();
@@ -71,11 +78,21 @@ public class DataSeeder implements CommandLineRunner {
         address.setState("CA");
         address.setZipCode("94105");
         address.setCountry("USA");
-        address.setDefault(true);
+        address.setIsDefault(true);
         addressRepository.save(address);
 
         Cart cart = new Cart();
         cart.setUser(user);
         cartRepository.save(cart);
+
+        // Create admin user
+        User admin = User.builder()
+                .email("admin@qkart.com")
+                .password(passwordEncoder.encode("Admin@123"))
+                .name("Admin User")
+                .role(User.Role.ADMIN)
+                .emailVerified(true)
+                .build();
+        userRepository.save(admin);
     }
 }
